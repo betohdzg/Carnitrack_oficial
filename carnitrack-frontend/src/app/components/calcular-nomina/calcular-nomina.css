@@ -1,0 +1,351 @@
+/* src/app/components/calcular-nomina/calcular-nomina.component.css */
+
+.container-nomina {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 1200px;
+  margin: 20px auto;
+  backdrop-filter: blur(10px);
+  font-family: 'Poppins', sans-serif;
+}
+
+.formulario-nomina h2 {
+  text-align: center;
+  color: #000;
+  font-size: 28px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.formulario-nomina p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.filtro-fechas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 200px;
+}
+
+.form-group label {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #941c2fff;
+  font-size: 16px;
+  color: #333;
+  background-color: #fff;
+}
+
+.form-group input:disabled,
+.form-group select:disabled {
+  background-color: #f5f5f5;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #d12e4a;
+  box-shadow: 0 0 0 2px rgba(209, 46, 74, 0.2);
+}
+
+.form-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.cta-button {
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  background-color: #941c2fff;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 180px;
+  transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: #d12e4a;
+}
+
+.cta-button.secondary {
+  background-color: #4682b4;
+}
+
+.cta-button.secondary:hover {
+  background-color: #5f9ea0;
+}
+
+.tabla-nomina {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+}
+
+.tabla-nomina table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  background-color: white;
+}
+
+.tabla-nomina th {
+  background-color: #941c2fff;
+  color: white;
+  padding: 14px 12px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.tabla-nomina td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.tabla-nomina tr:hover {
+  background-color: rgba(148, 28, 47, 0.08);
+}
+
+.no-data {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 20px;
+  font-size: 16px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.modal[style*="flex"] {
+  display: flex !important;
+}
+
+.modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.modal .close {
+  position: absolute;
+  top: 10px; right: 15px;
+  font-size: 28px;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.modal .close:hover { color: #000; }
+
+.modal h3 {
+  color: #333;
+  margin: 15px 0 8px;
+  font-size: 22px;
+}
+
+.modal p {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.modal .cta-button {
+  background-color: #941c2fff;
+  min-width: 140px;
+}
+
+.modal .cta-button:hover {
+  background-color: #d12e4a;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filtro-fechas {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .form-group {
+    min-width: 100%;
+  }
+  .form-buttons {
+    flex-direction: column;
+  }
+  .cta-button {
+    width: 100%;
+  }
+}
+
+/* Botón para abrir/cerrar el menú */
+.menu-toggle {
+    position: fixed;
+    top: 20px;
+    left: 10px;
+    font-size: 24px;
+    color: #000;
+    cursor: pointer;
+    z-index: 1001;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Menú lateral */
+.menu-lateral {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: -250px;
+    padding: 20px;
+    box-shadow: none;
+    transition: left 0.3s ease;
+    z-index: 1000;
+}
+
+.menu-lateral.active {
+    left: 0;
+}
+
+.menu-header h2 {
+    color: #000;
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.menu-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-items li {
+    margin-bottom: 15px;
+}
+
+.menu-items li a {
+    color: #000;
+    text-decoration: none;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.menu-items li a:hover {
+    background-color: #7a96b0;
+}
+
+.menu-items li a i {
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+/* Ocultar el submenú inicialmente */
+.submenu {
+    display: none;
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+/* Mostrar el submenú cuando tenga la clase 'active' */
+.submenu.active {
+    display: block;
+}
+
+/* Header */
+header {
+    color: #000;
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header .titulo {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    margin-left: 20px;
+}
+
+/* Contenido principal */
+.contenido-principal {
+    margin-left: 0;
+    padding: 20px;
+    transition: margin-left 0.3s ease;
+}
+
+.menu-lateral.active ~ .contenido-principal {
+    margin-left: 250px;
+}
+
+/* Estilos del footer */
+footer {
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 60px;
+}
+
+footer p {
+    margin: 0;
+}

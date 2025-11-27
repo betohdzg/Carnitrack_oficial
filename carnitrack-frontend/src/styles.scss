@@ -1,0 +1,17 @@
+/* src/styles.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif; /* Unifica con login y dashboard */
+    margin: 0;
+    padding: 0;
+    color: #000000ff; /* --black para texto principal */
+    line-height: 1.6;
+    background: #8da7beff; /* --cadet-gray como fondo */
+    min-height: 100vh;
+    overflow-x: hidden; /* Evita desplazamiento horizontal no deseado */
+}

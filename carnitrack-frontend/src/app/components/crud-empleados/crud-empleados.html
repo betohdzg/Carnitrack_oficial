@@ -1,0 +1,172 @@
+
+<div class="menu-toggle" (click)="toggleMenu()">
+  <i class="fas fa-bars"></i>
+</div>
+
+<!-- Menú lateral -->
+<aside class="menu-lateral" [class.active]="menuActive">
+  <div class="menu-header">
+    <h2>Menú</h2>
+  </div>
+
+  <!-- Menú Gerente -->
+  <ul class="menu-items" *ngIf="isGerente">
+    <li><a routerLink="/dashboard"><i class="fas fa-home"></i> Inicio</a></li>
+    <li><a routerLink="/ver-productos-geren"><i class="fas fa-eye"></i> Ver Productos</a></li>
+    <li>
+      <a (click)="toggleMovimientos()" id="movimientos"><i class="fas fa-exchange-alt"></i> Movimientos</a>
+      <ul class="submenu" [class.active]="movimientosActive">
+        <li><a routerLink="/entrada-productos"><i class="fas fa-plus"></i> Entrada</a></li>
+        <li><a routerLink="/salida-producto"><i class="fas fa-minus"></i> Salida</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="/reporte-ventas"><i class="fas fa-chart-line"></i> Reportes de Ventas</a></li>
+        <li>
+            <a  (click)="toggleNomina()" id="nomina"><i class="fas fa-money-check"></i> Nómina</a>
+                <ul class="submenu" [class.active]="nominaActive">
+            <li><a href="/bono-extras-nom" onclick="setActive(this)"><i class="fas fa-gift"></i> Bonos y Extras</a></li>
+            <li><a href="/calcular-nomina" onclick="setActive(this)"><i class="fas fa-calculator"></i> Cálculo Nómina</a></li>
+            </ul>       
+        </li>    
+    <li><a routerLink="/cuentas-empleadoss"><i class="fas fa-users-cog"></i> Cuentas de Empleados</a></li>
+    <li><a routerLink="/mi-cuenta"><i class="fas fa-users"></i> Mi Cuenta</a></li>
+    <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+  </ul>
+
+  <!-- Menú Empleado -->
+  <ul class="menu-items" *ngIf="!isGerente">
+    <li><a routerLink="/dashboard"><i class="fas fa-home"></i> Inicio</a></li>
+    <li><a routerLink="/ver-productos-emple"><i class="fas fa-eye"></i> Ver Productos</a></li>
+    <li>
+      <a (click)="toggleMovimientos()" id="movimientos"><i class="fas fa-exchange-alt"></i> Movimientos</a>
+      <ul class="submenu" [class.active]="movimientosActive">
+        <li><a routerLink="/entrada-productos"><i class="fas fa-plus"></i> Entrada</a></li>
+        <li><a routerLink="/salida-producto"><i class="fas fa-minus"></i> Salida</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="/mi-cuenta"><i class="fas fa-users"></i> Mi Cuenta</a></li>
+    <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+  </ul>
+</aside>
+
+<!-- Contenido principal -->
+<main class="contenido-principal">
+  <header>
+    <div class="titulo">
+      <h1>CarneTrack</h1>
+    </div>
+  </header>
+
+  <section class="formulario-empleado">
+    <div class="container">
+      <h2>{{ esEdicion ? 'Editar Empleado' : 'Agregar Nuevo Trabajador' }}</h2>
+
+<form (ngSubmit)="guardarEmpleado($event)">
+  <!-- Nombre -->
+  <div class="form-group">
+    <label for="nombre">Nombre Completo</label>
+    <input 
+      type="text" 
+      [(ngModel)]="empleado.nom_trb" 
+      name="nom_trb" 
+      placeholder="Ej: Juan Pérez"
+      required
+    >
+  </div>
+
+  <!-- Puesto y Salario -->
+  <div class="form-row">
+    <div class="form-group">
+      <label for="puesto">Puesto</label>
+      <input
+        type="text"  
+        [(ngModel)]="empleado.puesto" 
+        name="puesto"
+        placeholder="Ej: Cajero, Carnicero"
+        required
+      >
+    </div>
+    <div class="form-group">
+      <label for="salario">Salario Base</label>
+      <input
+        type="number"
+        step="0.01"
+        [(ngModel)]="empleado.sal_base" 
+        name="sal_base"
+        placeholder="Ej: 8500.00"
+        required
+      >
+    </div>
+  </div>
+
+  <!-- Usuario -->
+  <div class="form-group">
+    <label for="usuario">Usuario</label>
+    <input
+      type="text"
+      [(ngModel)]="empleado.user_trb" 
+      name="user_trb"
+      placeholder="Ej: juan123"
+      required
+    >
+  </div>
+
+  <!-- Contraseña -->
+  <div class="form-group">
+    <label for="password">
+      Contraseña 
+      <small *ngIf="esEdicion">(dejar en blanco para no cambiar)</small>
+    </label>
+    <input
+      type="password"
+      [(ngModel)]="empleado.psw_trb" 
+      name="psw_trb"
+      [placeholder]="esEdicion ? 'Mínimo 6 caracteres (opcional)' : 'Mínimo 6 caracteres'"
+      [minlength]="esEdicion ? 0 : 6"
+      [required]="!esEdicion"
+    >
+  </div>
+
+  <!-- Botones -->
+  <!-- === BOTONES SEPARADOS === -->
+        <div class="botones-formulario">
+          <!-- Guardar / Actualizar -->
+          <button type="submit" class="guardar-btn">
+            {{ esEdicion ? 'Actualizar' : 'Guardar' }}
+          </button>
+
+          <!-- Volver (solo en edición) -->
+          <div class="volver-btn" *ngIf="esEdicion">
+            <button type="button" (click)="volverALaLista()">
+              Volver a la lista
+            </button>
+          </div>
+        </div>
+    </form>
+    </div>
+  </section>
+
+  <!-- Modal de éxito -->
+  <div class="modal" #successModal>
+    <div class="modal-content">
+      <span class="close" #closeBtn>×</span>
+      <div class="modal-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h3>¡Empleado registrado!</h3>
+      <p>El trabajador ha sido agregado con éxito.</p>
+      <button #acceptButton class="cta-button">Aceptar</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>© 2025/6 CarneTrack. Todos los derechos reservados.</p>
+      <div class="social-links">
+        <a href="#"><i class="fab fa-facebook-f"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+  </footer>
+</main>

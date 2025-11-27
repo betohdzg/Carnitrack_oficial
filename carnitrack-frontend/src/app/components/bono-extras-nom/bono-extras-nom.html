@@ -1,0 +1,162 @@
+
+<div class="menu-toggle" (click)="toggleMenu()">
+  <i class="fas fa-bars"></i>
+</div>
+
+<!-- Menú lateral -->
+<aside class="menu-lateral" [class.active]="menuActive">
+  <div class="menu-header">
+    <h2>Menú</h2>
+  </div>
+
+  <!-- Menú Gerente -->
+  <ul class="menu-items" *ngIf="isGerente">
+    <li><a routerLink="/dashboard"><i class="fas fa-home"></i> Inicio</a></li>
+    <li><a routerLink="/ver-productos-geren"><i class="fas fa-eye"></i> Ver Productos</a></li>
+    <li>
+      <a (click)="toggleMovimientos()" id="movimientos"><i class="fas fa-exchange-alt"></i> Movimientos</a>
+      <ul class="submenu" [class.active]="movimientosActive">
+        <li><a routerLink="/entrada-productos"><i class="fas fa-plus"></i> Entrada</a></li>
+        <li><a routerLink="/salida-producto"><i class="fas fa-minus"></i> Salida</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="/reporte-ventas"><i class="fas fa-chart-line"></i> Reportes de Ventas</a></li>
+        <li>
+            <a  (click)="toggleNomina()" id="nomina"><i class="fas fa-money-check"></i> Nómina</a>
+                <ul class="submenu" [class.active]="nominaActive">
+            <li><a href="/bono-extras-nom" onclick="setActive(this)"><i class="fas fa-gift"></i> Bonos y Extras</a></li>
+            <li><a href="/calcular-nomina" onclick="setActive(this)"><i class="fas fa-calculator"></i> Cálculo Nómina</a></li>
+            </ul>       
+        </li>    
+    <li><a routerLink="/cuentas-empleadoss"><i class="fas fa-users-cog"></i> Cuentas de Empleados</a></li>
+    <li><a routerLink="/mi-cuenta"><i class="fas fa-users"></i> Mi Cuenta</a></li>
+    <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+  </ul>
+
+  <!-- Menú Empleado -->
+  <ul class="menu-items" *ngIf="!isGerente">
+    <li><a routerLink="/dashboard"><i class="fas fa-home"></i> Inicio</a></li>
+    <li><a routerLink="/ver-productos-emple"><i class="fas fa-eye"></i> Ver Productos</a></li>
+    <li>
+      <a (click)="toggleMovimientos()" id="movimientos"><i class="fas fa-exchange-alt"></i> Movimientos</a>
+      <ul class="submenu" [class.active]="movimientosActive">
+        <li><a routerLink="/entrada-productos"><i class="fas fa-plus"></i> Entrada</a></li>
+        <li><a routerLink="/salida-producto"><i class="fas fa-minus"></i> Salida</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="/mi-cuenta"><i class="fas fa-users"></i> Mi Cuenta</a></li>
+    <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+  </ul>
+</aside>
+
+<!-- Contenido principal -->
+<main class="contenido-principal">
+  <header>
+    <div class="titulo"><h1>CarneTrack</h1></div>
+  </header>
+
+  <section class="formulario-bonos">
+    <div class="container-bono">
+      <h2>Asignar Bonos y Horas Extras</h2>
+
+ <form (ngSubmit)="asignarBono($event)">
+        <!-- TODOS LOS CAMPOS EN .filtro-fechas -->
+        <div class="filtro-fechas">
+          <!-- ID Empleado -->
+          <div class="form-group">
+            <label>ID Empleado:</label>
+            <select [(ngModel)]="bono.empleado_id" name="empleado_id" required>
+              <option value="">Seleccione...</option>
+              <option *ngFor="let emp of empleados" [value]="emp.id">
+                {{ emp.id }} - {{ emp.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Monto -->
+          <div class="form-group">
+            <label>Monto de Bono:</label>
+            <input type="number" step="0.01" [(ngModel)]="bono.monto" name="monto" placeholder="Ej. 500.00" required>
+          </div>
+
+          <!-- Motivo -->
+          <div class="form-group">
+            <label>Motivo del Bono:</label>
+            <input type="text" [(ngModel)]="bono.motivo" name="motivo" placeholder="Ej. Productividad">
+          </div>
+
+          <!-- Horas Extras -->
+          <div class="form-group">
+            <label>Horas Extras:</label>
+            <input type="number" [(ngModel)]="bono.horas_extras" name="horas_extras" placeholder="Ej. 3" min="0" max="8">
+          </div>
+
+          <!-- Fecha de Pago -->
+          <div class="form-group">
+            <label>Fecha de Pago:</label>
+            <input type="date" [(ngModel)]="bono.fecha_pago" name="fecha_pago" required>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="form-buttons">
+          <button type="submit" class="cta-button">Asignar Bono/Horas</button>
+          <button type="button" class="cta-button secondary" (click)="generarReporte()">Generar Reporte</button>
+        </div>
+      </form>
+
+      <!-- Tabla -->
+      <div class="tabla-bonos" *ngIf="bonos.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>ID Empleado</th>
+              <th>Nombre</th>
+              <th>Bono Monto</th>
+              <th>Motivo</th>
+              <th>Horas Extras</th>
+              <th>Fecha de Pago</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let b of bonos; let i = index">
+              <td>{{ b.empleado_id }}</td>
+              <td>{{ b.empleado_nombre }}</td>
+              <td>${{ b.monto | number:'1.2-2' }}</td>
+              <td>{{ b.motivo || '-' }}</td>
+              <td>{{ b.horas_extras }}</td>
+              <td>{{ b.fecha_pago }}</td>
+              <td class="acciones">
+                <button class="action-button edit-button">
+                  <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="action-button delete-button" (click)="eliminarBono(i)">
+                  <i class="fas fa-trash"></i> Borrar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p *ngIf="bonos.length === 0" class="no-data">No hay bonos asignados.</p>
+    </div>
+  </section>
+
+  <!-- MODAL OCULTO POR DEFECTO -->
+  <div class="modal" #successModal style="display: none;">
+    <div class="modal-content">
+      <span class="close" #closeBtn>×</span>
+      <h3>¡Bono asignado!</h3>
+      <p>El bono y horas extras han sido registrados.</p>
+      <button #acceptButton class="cta-button">Aceptar</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>© 2025/6 CarneTrack. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+</main>

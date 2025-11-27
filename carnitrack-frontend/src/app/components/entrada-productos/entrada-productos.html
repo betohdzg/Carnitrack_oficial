@@ -1,0 +1,157 @@
+<!-- Botón para abrir/cerrar el menú -->
+<div class="menu-toggle" (click)="toggleMenu()">
+  <i class="fas fa-bars"></i>
+</div>
+
+<!-- Menú lateral -->
+<aside class="menu-lateral" [class.active]="menuActive">
+  <div class="menu-header">
+    <h2>Menú</h2>
+  </div>
+
+  <!-- Menú para Gerente -->
+  <ul class="menu-items" *ngIf="isGerente">
+    <li><a routerLink="/dashboard"><i class="fas fa-home"></i> Inicio</a></li>
+    <li><a routerLink="/ver-productos-geren"><i class="fas fa-eye"></i> Ver Productos</a></li>
+    <li>
+      <a (click)="toggleMovimientos()" id="movimientos"><i class="fas fa-exchange-alt"></i> Movimientos</a>
+      <ul class="submenu" [class.active]="movimientosActive">
+        <li><a routerLink="/entrada-productos"><i class="fas fa-plus"></i> Entrada</a></li>
+        <li><a routerLink="/salida-producto"><i class="fas fa-minus"></i> Salida</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="/reporte-ventas"><i class="fas fa-chart-line"></i> Reportes de Ventas</a></li>
+    <li>
+      <a (click)="toggleNomina()" id="nomina"><i class="fas fa-money-check"></i> Nómina</a>
+      <ul class="submenu" [class.active]="nominaActive">
+        <li><a href="/bono-extras-nom" onclick="setActive(this)"><i class="fas fa-gift"></i> Bonos y Extras</a></li>
+        <li><a href="/calcular-nomina" onclick="setActive(this)"><i class="fas fa-calculator"></i> Cálculo Nómina</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="/cuentas-empleadoss"><i class="fas fa-users-cog"></i> Cuentas de Empleados</a></li>
+    <li><a routerLink="/mi-cuenta"><i class="fas fa-users"></i> Mi Cuenta</a></li>
+    <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+  </ul>
+
+  <!-- Menú para Empleado -->
+  <ul class="menu-items" *ngIf="!isGerente">
+    <li><a routerLink="/dashboard"><i class="fas fa-home"></i> Inicio</a></li>
+    <li><a routerLink="/ver-productos-emple"><i class="fas fa-eye"></i> Ver Productos</a></li>
+    <li>
+      <a (click)="toggleMovimientos()" id="movimientos"><i class="fas fa-exchange-alt"></i> Movimientos</a>
+      <ul class="submenu" [class.active]="movimientosActive">
+        <li><a routerLink="/entrada-productos"><i class="fas fa-plus"></i> Entrada</a></li>
+        <li><a routerLink="/salida-producto"><i class="fas fa-minus"></i> Salida</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="/mi-cuenta"><i class="fas fa-users"></i> Mi Cuenta</a></li>
+    <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+  </ul>
+</aside>
+
+<!-- Contenido principal -->
+<main class="contenido-principal">
+  <header>
+    <div class="titulo">
+      <h1>CarneTrack</h1>
+    </div>
+  </header>
+
+  <!-- Formulario de Producto -->
+  <section class="formulario-producto">
+    <div class="container">
+      <h2>{{ esEdicion ? 'Editar Producto' : 'Agregar Nuevo Producto' }}</h2>
+
+      <!-- FORMULARIO PRINCIPAL (solo 1) -->
+      <form (submit)="guardarProducto($event)" class="formulario">
+
+        <!-- ID del Producto -->
+        <div class="form-group id_producto">
+          <label for="id_producto">ID del Producto</label>
+          <input type="text" id="id_producto" [(ngModel)]="producto.id_producto" name="id_productos" placeholder="Ej: CAR-RES-001" required>
+          <small class="form-text">El ID debe comenzar con CAR- seguido de tipo y número (ej: CAR-RES-001).</small>
+        </div>
+
+        <!-- Nombre -->
+        <div class="form-group nombre_producto">
+          <label for="nombre_producto">Nombre del Producto</label>
+          <input type="text" id="nombre_producto" [(ngModel)]="producto.nombre" name="nombre_producto" placeholder="Ej: Carne Molida" required>
+        </div>
+
+        <!-- Tipo de Carne -->
+        <div class="form-group">
+          <label for="tipo_carne">Tipo de Carne</label>
+          <select id="tipo_carne" [(ngModel)]="producto.tipo_carne" name="tipo_carne" required>
+            <option value="">Seleccione un tipo</option>
+            <option value="res">Res</option>
+            <option value="pollo">Pollo</option>
+            <option value="pescado">Pescado</option>
+          </select>
+        </div>
+
+        <!-- Precio y Stock -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="precio_kg">Precio por kg</label>
+            <input type="number" step="0.01" id="precio_kg" [(ngModel)]="producto.precio_kg" name="precio_kg" placeholder="Ej: 50.00" required>
+          </div>
+          <div class="form-group">
+            <label for="stock">Stock (kg)</label>
+            <input type="number" step="0.1" id="stock" [(ngModel)]="producto.stock_kg" name="stock" placeholder="Ej: 10.5" required>
+          </div>
+        </div>
+
+        <!-- Fechas -->
+        <div class="form-group">
+          <label for="fecha_entrada">Fecha de Entrada</label>
+          <input type="date" id="fecha_entrada" [(ngModel)]="producto.fecha_entrada" name="fecha_entrada" required>
+        </div>
+
+        <div class="form-group">
+          <label for="fecha_caducidad">Fecha de Caducidad</label>
+          <input type="date" id="fecha_caducidad" [(ngModel)]="producto.fecha_caducidad" name="fecha_caducidad" required>
+        </div>
+
+        <!-- === BOTONES SEPARADOS === -->
+        <div class="botones-formulario">
+          <!-- Guardar / Actualizar -->
+          <button type="submit" class="guardar-btn">
+            {{ esEdicion ? 'Actualizar' : 'Guardar' }}
+          </button>
+
+          <!-- Volver (solo en edición) -->
+          <div class="volver-btn" *ngIf="esEdicion">
+            <button type="button" (click)="volverALaLista()">
+              Volver a la lista
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Modal de éxito -->
+  <div id="successModal" class="modal" #successModal>
+    <div class="modal-content">
+      <span class="close" #closeBtn>×</span>
+      <div class="modal-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h3>Producto registrado correctamente</h3>
+      <p>El producto ha sido registrado exitosamente en la base de datos.</p>
+      <button id="acceptButton" class="cta-button" #acceptButton>Aceptar</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2025/6 CarneTrack. Todos los derechos reservados.</p>
+      <div class="social-links">
+        <a href="#"><i class="fab fa-facebook-f"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+  </footer>
+</main>

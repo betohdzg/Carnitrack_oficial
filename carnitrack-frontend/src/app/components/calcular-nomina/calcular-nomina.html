@@ -1,0 +1,149 @@
+<!-- src/app/components/calcular-nomina/calcular-nomina.component.html -->
+
+<div class="menu-toggle" (click)="toggleMenu()">
+  <i class="fas fa-bars"></i>
+</div>
+
+<aside class="menu-lateral" [class.active]="menuActive">
+  <div class="menu-header"><h2>Menú</h2></div>
+
+  <!-- Menú Gerente -->
+  <ul class="menu-items" *ngIf="isGerente">
+    <li><a routerLink="/dashboard"><i class="fas fa-home"></i> Inicio</a></li>
+    <li><a routerLink="/ver-productos-geren"><i class="fas fa-eye"></i> Ver Productos</a></li>
+    <li>
+      <a (click)="toggleMovimientos()" id="movimientos"><i class="fas fa-exchange-alt"></i> Movimientos</a>
+      <ul class="submenu" [class.active]="movimientosActive">
+        <li><a routerLink="/entrada-productos"><i class="fas fa-plus"></i> Entrada</a></li>
+        <li><a routerLink="/salida-producto"><i class="fas fa-minus"></i> Salida</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="/reporte-ventas"><i class="fas fa-chart-line"></i> Reportes de Ventas</a></li>
+    <li>
+      <a (click)="toggleNomina()" id="nomina"><i class="fas fa-money-check"></i> Nómina</a>
+      <ul class="submenu" [class.active]="nominaActive">
+        <li><a routerLink="/bono-extras-nom"><i class="fas fa-gift"></i> Bonos y Extras</a></li>
+        <li><a routerLink="/calcular-nomina"><i class="fas fa-calculator"></i> Cálculo Nómina</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="/cuentas-empleadoss"><i class="fas fa-users-cog"></i> Cuentas de Empleados</a></li>
+    <li><a routerLink="/mi-cuenta"><i class="fas fa-users"></i> Mi Cuenta</a></li>
+    <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+  </ul>
+</aside>
+
+<main class="contenido-principal">
+  <header>
+    <div class="titulo"><h1>CarneTrack</h1></div>
+  </header>
+
+  <section class="formulario-nomina">
+    <div class="container-nomina">
+      <h2>Nómina de Empleados</h2>
+
+      <form (ngSubmit)="guardarNomina()">
+        <div class="filtro-fechas">
+          <!-- ID Nómina (Auto-incremental) -->
+          <div class="form-group">
+            <label>ID Nómina:</label>
+            <input type="text" [(ngModel)]="nomina.id" name="id" placeholder="ID único (Auto-incremental)" disabled>
+          </div>
+
+          <!-- ID Empleado -->
+          <div class="form-group">
+            <label>ID Empleado:</label>
+            <select [(ngModel)]="nomina.empleado_id" name="empleado_id" (change)="cargarEmpleado()" required>
+              <option value="">Seleccione...</option>
+              <option *ngFor="let emp of empleados" [value]="emp.id">
+                {{ emp.id }} - {{ emp.nombre }} ({{ emp.salario | currency:'USD':'symbol':'1.2-2' }})
+              </option>
+            </select>
+          </div>
+
+          <!-- Periodo de Pago -->
+          <div class="form-group">
+            <label>Periodo de Pago:</label>
+            <input type="date" [(ngModel)]="nomina.periodo_pago" name="periodo_pago" required>
+          </div>
+
+          <!-- Salario Base -->
+          <div class="form-group">
+            <label>Salario Base:</label>
+            <input type="number" step="0.01" [(ngModel)]="nomina.salario_base" name="salario_base" placeholder="Del empleado" disabled>
+          </div>
+
+          <!-- Horas Extras -->
+          <div class="form-group">
+            <label>Horas Extras:</label>
+            <input type="number" [(ngModel)]="nomina.horas_extras" name="horas_extras" placeholder="Ej. 10" min="0" (input)="calcularTotal()">
+          </div>
+
+          <!-- Bonos -->
+          <div class="form-group">
+            <label>Bonos:</label>
+            <input type="number" step="0.01" [(ngModel)]="nomina.bonos" name="bonos" placeholder="Ej. 500.00" (input)="calcularTotal()">
+          </div>
+
+          <!-- Salario Total -->
+          <div class="form-group">
+            <label>Salario Total:</label>
+            <input type="number" step="0.01" [(ngModel)]="nomina.salario_total" name="salario_total" placeholder="Calculado automáticamente" disabled>
+          </div>
+        </div>
+
+        <div class="form-buttons">
+          <button type="button" class="cta-button" (click)="calcularNomina()">Calcular Nómina</button>
+          <button type="submit" class="cta-button secondary">Guardar Nómina</button>
+        </div>
+      </form>
+
+      <!-- Tabla -->
+      <div class="tabla-nomina" *ngIf="nominas.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>ID Nómina</th>
+              <th>ID Empleado</th>
+              <th>Nombre</th>
+              <th>Periodo</th>
+              <th>Salario Base</th>
+              <th>Hrs Extras</th>
+              <th>Bonos</th>
+              <th>Salario Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let n of nominas">
+              <td>{{ n.id }}</td>
+              <td>{{ n.empleado_id }}</td>
+              <td>{{ n.empleado_nombre }}</td>
+              <td>{{ n.periodo_pago }}</td>
+              <td>{{ n.salario_base | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td>{{ n.horas_extras }}</td>
+              <td>{{ n.bonos | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td>{{ n.salario_total | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p *ngIf="nominas.length === 0" class="no-data">No hay nóminas calculadas.</p>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <div class="modal" #successModal style="display: none;">
+    <div class="modal-content">
+      <span class="close" #closeBtn>×</span>
+      <h3>¡Nómina guardada!</h3>
+      <p>La nómina ha sido registrada correctamente.</p>
+      <button #acceptButton class="cta-button">Aceptar</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>© 2025/6 CarneTrack. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+</main>

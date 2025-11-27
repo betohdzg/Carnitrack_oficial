@@ -1,0 +1,346 @@
+/* Estilos generales */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    line-height: 1.6;
+    background: #fff; /* Fondo blanco sin gradiente, como pediste */
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Botón para abrir/cerrar el menú */
+.menu-toggle {
+    position: fixed;
+    top: 20px;
+    left: 10px;
+    font-size: 24px;
+    color: #000; /* Texto negro para contrastar con fondo blanco */
+    cursor: pointer;
+    z-index: 1001;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Menú lateral */
+.menu-lateral {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: -250px;
+    padding: 20px;
+    box-shadow: none; /* Línea modificada */
+    transition: left 0.3s ease;
+    z-index: 1000;
+}
+
+.menu-lateral.active {
+    left: 0;
+}
+
+.menu-header h2 {
+    color: #000; /* Texto negro */
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.menu-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-items li {
+    margin-bottom: 15px;
+}
+
+.menu-items li a {
+    color: #000; /* Texto negro */
+    text-decoration: none;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.menu-items li a:hover {
+    background-color: #7a96b0;  /* Fondo claro al hover */
+    transition: all 0.3s ease;
+}
+
+.menu-items li a i {
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+/* Ocultar el submenú inicialmente */
+.submenu {
+    display: none;
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+/* Mostrar el submenú cuando tenga la clase 'active' */
+.submenu.active {
+    display: block;
+}
+
+/* Header */
+header {
+    color: #000; /* Texto negro */
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header .container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    margin-left: 20px; /* Línea añadida */
+}
+
+/* Contenido principal */
+.contenido-principal {
+    margin-left: 0;
+    padding: 20px;
+    transition: margin-left 0.3s ease;
+}
+
+.menu-lateral.active ~ .contenido-principal {
+    margin-left: 250px; /* Desplazamiento cuando el menú está abierto */
+}
+
+/* Estilos del hero */
+.hero {
+    padding: 150px 0;
+    text-align: center;
+    color: #000;
+}
+
+.hero h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.hero p {
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+/* Estilos para el grupo de botones */
+.button-group {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Estilos para los botones */
+.cta-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 30px;
+    background-color: #941c2fff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 18px;
+    transition: background-color 0.3s ease;
+}
+
+.cta-button i {
+    margin-right: 10px;
+}
+
+.cta-button:hover {
+    background-color: #d12e4a; /* Mantiene el color, ajusta si quieres cambio */
+}
+
+/* Estilos para la sección de productos */
+.productos {
+    padding: 60px 0;
+}
+
+.productos h2 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 40px;
+    color: #000;
+}
+
+.lista-productos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 0 20px;
+}
+
+.producto {
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    padding: 15px;
+    max-width: 420px;
+    height: 457px;
+}
+
+.producto:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.producto img {
+    max-height: 280px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+.producto h3 {
+    font-size: 24px;
+    margin: 10px 0;
+    color: #333;
+}
+
+.producto p {
+    font-size: 18px;
+    color: #666;
+    margin: 5px 0;
+}
+
+.producto .precio {
+    font-size: 22px;
+    color: #941c2fff;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.producto .stock {
+    font-size: 16px;
+    margin: 5px 0;
+    font-weight: bold;
+}
+
+.producto .stock-verde {
+    color: #28a745;
+}
+
+.producto .stock-amarillo {
+    color: #ffc107;
+}
+
+.producto .stock-rojo {
+    color: #dc3545;
+}
+
+/* Estilos del footer */
+footer {
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 60px;
+}
+
+footer p {
+    margin: 0;
+}
+
+.social-links {
+    margin-top: 10px;
+}
+
+.social-links a {
+    color: #fff;
+    margin: 0 10px;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+    color: #f0f0f0;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 1024px) {
+    .menu-lateral.active ~ .contenido-principal {
+        margin-left: 200px;
+    }
+    header .container {
+        padding: 0 30px;
+    }
+    header h1 {
+        font-size: 22px;
+    }
+    .producto {
+        height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .menu-lateral {
+        width: 200px;
+    }
+    .menu-lateral.active ~ .contenido-principal {
+        margin-left: 200px;
+    }
+    header .container {
+        padding: 0 20px;
+    }
+    header h1 {
+        font-size: 20px;
+    }
+    .lista-productos {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-lateral {
+        width: 150px;
+    }
+    .menu-lateral.active ~ .contenido-principal {
+        margin-left: 150px;
+    }
+    header .container {
+        padding: 0 10px;
+    }
+    header h1 {
+        font-size: 18px;
+    }
+    .lista-productos {
+        grid-template-columns: 1fr;
+    }
+    .hero {
+        padding: 100px 0;
+    }
+    .hero h2 {
+        font-size: 28px;
+    }
+    .hero p {
+        font-size: 16px;
+    }
+    .cta-button {
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+}

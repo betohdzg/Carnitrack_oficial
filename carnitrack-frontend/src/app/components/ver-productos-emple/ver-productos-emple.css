@@ -1,0 +1,393 @@
+/* Contenedor principal */
+.container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+    font-family: 'Poppins', sans-serif;
+    backdrop-filter: blur(10px);
+    min-height: 500px; /* ¡ESTO ES CLAVE! */
+    z-index: 1;
+}
+
+/* Título */
+h2 {
+    text-align: center;
+    color: #000;
+    font-size: 28px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+/* Barra de búsqueda y botón */
+.search-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    padding: 12px;
+    border: 2px solid #941c2fff;
+    border-radius: 8px;
+    font-size: 16px;
+    min-width: 280px;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: #d12e4a;
+    box-shadow: 0 0 0 3px rgba(209, 46, 74, 0.2);
+}
+
+.search-bar button,
+.add-button {
+    padding: 12px 24px;
+    background-color: #941c2fff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+    font-weight: 500;
+}
+
+.search-bar button:hover,
+.add-button:hover {
+    background-color: #d12e4a;
+}
+
+/* Íconos en botones */
+.search-bar button i,
+.add-button i {
+    font-size: 18px;
+}
+
+/* Tabla de Productos - Responsiva */
+.tabla-productos {
+    overflow-x: auto;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 20px;
+}
+
+#tabla-productos {
+width: 100% !important;    
+border-collapse: collapse;
+    min-width: 900px; /* Aumentado para incluir la nueva columna */
+}
+
+#tabla-productos th,
+#tabla-productos td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    white-space: nowrap;
+}
+
+#tabla-productos th {
+    background-color: #941c2fff;
+    color: #fff;
+    font-weight: 600;
+}
+
+#tabla-productos tr:hover {
+    background-color: rgba(148, 28, 47, 0.1);
+}
+
+.status-available {
+    color: #28a745;
+    font-weight: bold;
+}
+
+/* Scrollbar personalizado para la tabla */
+.tabla-productos::-webkit-scrollbar {
+    height: 8px;
+}
+
+.tabla-productos::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.tabla-productos::-webkit-scrollbar-thumb {
+    background: #941c2fff;
+    border-radius: 4px;
+}
+
+.tabla-productos::-webkit-scrollbar-thumb:hover {
+    background: #7a1626;
+}
+
+/* Botones de acción (Editar y Borrar) */
+.action-button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 5px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.edit-button {
+    background-color: #28a745; /* Verde para editar */
+    color: #fff;
+}
+
+.edit-button:hover {
+    background-color: #218838;
+}
+
+.delete-button {
+    background-color: #dc3545; /* Rojo para borrar */
+    color: #fff;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+.action-button i {
+    margin-right: 5px;
+}
+
+/* Responsivo para tablets y móviles */
+@media (max-width: 768px) {
+    .tabla-productos {
+        font-size: 14px;
+    }
+
+    #tabla-productos {
+        min-width: 800px;
+    }
+
+    #tabla-productos th,
+    #tabla-productos td {
+        padding: 8px 6px;
+    }
+
+    .action-button {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tabla-productos {
+        font-size: 12px;
+    }
+
+    #tabla-productos {
+        min-width: 700px;
+    }
+
+    #tabla-productos th,
+    #tabla-productos td {
+        padding: 6px 4px;
+        font-size: 12px;
+    }
+
+    .search-bar {
+        flex-direction: column;
+    }
+
+    .search-bar input {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .action-button {
+        padding: 3px 6px;
+        font-size: 10px;
+    }
+}
+
+
+/* Mensaje sin datos */
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 18px;
+}
+
+/* Loader */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #941c2fff;
+  font-size: 18px;
+}
+
+.loading i {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+/* Estilos del footer */
+footer {
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 60px;
+}
+
+footer p {
+    margin: 0;
+}
+
+.social-links {
+    margin-top: 10px;
+}
+
+.social-links a {
+    color: #fff;
+    margin: 0 10px;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+    color: #f0f0f0;
+}
+
+/* Botón para abrir/cerrar el menú */
+.menu-toggle {
+    position: fixed;
+    top: 20px;
+    left: 10px;
+    font-size: 24px;
+    color: #000;
+    cursor: pointer;
+    z-index: 1001;
+    padding: 10px;
+    border-radius: 50%;
+}
+
+/* Menú lateral */
+.menu-lateral {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: -250px;
+    padding: 20px;
+    transition: left 0.3s ease;
+    z-index: 1000;
+}
+
+.menu-lateral.active {
+    left: 0;
+}
+
+.menu-header h2 {
+    color: #000;
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.menu-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-items li {
+    margin-bottom: 15px;
+}
+
+.menu-items li a {
+    color: #000;
+    text-decoration: none;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.menu-items li a:hover {
+    background-color: #7a96b0;
+}
+
+.menu-items li a i {
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+/* Ocultar el submenú inicialmente */
+.submenu {
+    display: none;
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+/* Mostrar el submenú cuando tenga la clase 'active' */
+.submenu.active {
+    display: block;
+}
+
+/* Header */
+header {
+    color: #000;
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header .titulo {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    margin-left: 20px;
+}
+
+/* Contenido principal */
+.contenido-principal {
+    flex: 1;
+    padding: 20px;
+    padding-left: 70px; /* Espacio fijo para el botón menú */
+    transition: padding-left 0.3s ease;
+}
+
+.menu-lateral.active ~ .contenido-principal {
+    padding-left: 270px; /* 250px menú + 20px padding */
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #a3bffa; /* Tu fondo azul */
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
