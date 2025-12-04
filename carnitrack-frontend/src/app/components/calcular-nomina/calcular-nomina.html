@@ -24,126 +24,122 @@
       <ul class="submenu" [class.active]="nominaActive">
         <li><a routerLink="/bono-extras-nom"><i class="fas fa-gift"></i> Bonos y Extras</a></li>
         <li><a routerLink="/calcular-nomina"><i class="fas fa-calculator"></i> Cálculo Nómina</a></li>
+        <li><a routerLink="/descuentos-nom"><i class="fas fa-hand-holding-usd"></i> Descuentos</a></li>
       </ul>
     </li>
-    <li><a routerLink="/cuentas-empleadoss"><i class="fas fa-users-cog"></i> Cuentas de Empleados</a></li>
-    <li><a routerLink="/mi-cuenta"><i class="fas fa-users"></i> Mi Cuenta</a></li>
-    <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+    <li><a routerLink="/cuentas-empleadoss"><i class="fas fa-users-cog"></i> Cuentas de Empleados</a></li>    <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
   </ul>
 </aside>
 
 <main class="contenido-principal">
-  <header>
-    <div class="titulo"><h1>CarneTrack</h1></div>
+<header class="main-header">
+    <h1>CarniTrack</h1>
   </header>
-
   <section class="formulario-nomina">
     <div class="container-nomina">
-      <h2>Nómina de Empleados</h2>
+      <h2>Cálculo de Nómina por Quincena</h2>
 
-      <form (ngSubmit)="guardarNomina()">
+      <div class="form-calculo">
         <div class="filtro-fechas">
-          <!-- ID Nómina (Auto-incremental) -->
           <div class="form-group">
-            <label>ID Nómina:</label>
-            <input type="text" [(ngModel)]="nomina.id" name="id" placeholder="ID único (Auto-incremental)" disabled>
-          </div>
-
-          <!-- ID Empleado -->
-          <div class="form-group">
-            <label>ID Empleado:</label>
-            <select [(ngModel)]="nomina.empleado_id" name="empleado_id" (change)="cargarEmpleado()" required>
-              <option value="">Seleccione...</option>
-              <option *ngFor="let emp of empleados" [value]="emp.id">
-                {{ emp.id }} - {{ emp.nombre }} ({{ emp.salario | currency:'USD':'symbol':'1.2-2' }})
+            <label>Empleado:</label>
+            <select [(ngModel)]="nomina.empleado_id" (change)="cargarSalarioBase()" required>
+              <option value="">Seleccione empleado...</option>
+              <option *ngFor="let e of empleados" [value]="e.id">
+                {{ e.id }} - {{ e.nombre }} (Salario: ${{ e.salario | number:'1.2-2' }})
               </option>
             </select>
           </div>
 
-          <!-- Periodo de Pago -->
           <div class="form-group">
-            <label>Periodo de Pago:</label>
-            <input type="date" [(ngModel)]="nomina.periodo_pago" name="periodo_pago" required>
+            <label>Inicio de Quincena:</label>
+            <input type="date" [(ngModel)]="nomina.inicio" required>
           </div>
 
-          <!-- Salario Base -->
           <div class="form-group">
-            <label>Salario Base:</label>
-            <input type="number" step="0.01" [(ngModel)]="nomina.salario_base" name="salario_base" placeholder="Del empleado" disabled>
-          </div>
-
-          <!-- Horas Extras -->
-          <div class="form-group">
-            <label>Horas Extras:</label>
-            <input type="number" [(ngModel)]="nomina.horas_extras" name="horas_extras" placeholder="Ej. 10" min="0" (input)="calcularTotal()">
-          </div>
-
-          <!-- Bonos -->
-          <div class="form-group">
-            <label>Bonos:</label>
-            <input type="number" step="0.01" [(ngModel)]="nomina.bonos" name="bonos" placeholder="Ej. 500.00" (input)="calcularTotal()">
-          </div>
-
-          <!-- Salario Total -->
-          <div class="form-group">
-            <label>Salario Total:</label>
-            <input type="number" step="0.01" [(ngModel)]="nomina.salario_total" name="salario_total" placeholder="Calculado automáticamente" disabled>
+            <label>Fin de Quincena:</label>
+            <input type="date" [(ngModel)]="nomina.fin" required>
           </div>
         </div>
 
-        <div class="form-buttons">
-          <button type="button" class="cta-button" (click)="calcularNomina()">Calcular Nómina</button>
-          <button type="submit" class="cta-button secondary">Guardar Nómina</button>
-        </div>
-      </form>
+        <button class="cta-button" (click)="calcularNominaAutomatica()">Calcular Nómina</button>
+      </div>
 
-      <!-- Tabla -->
-      <div class="tabla-nomina" *ngIf="nominas.length > 0">
+      <!-- RESULTADO -->
+      <div class="resultado-nomina" *ngIf="nomina.calculada">
+        <h3>Nómina Calculada Automáticamente</h3>
+        <div class="detalle">
+          <p><strong>Empleado:</strong> {{ nomina.nombre }}</p>
+          <p><strong>Periodo:</strong> {{ nomina.inicio | date:'dd/MM/yyyy' }} al {{ nomina.fin | date:'dd/MM/yyyy' }}</p>
+          <p><strong>Salario Base:</strong> ${{ nomina.sal_base | number:'1.2-2' }}</p>
+          <p><strong>Horas Extras:</strong> {{ nomina.total_hex }} hrs → ${{ nomina.monto_hex | number:'1.2-2' }}</p>
+          <p><strong>Bonos:</strong> ${{ nomina.total_bonos | number:'1.2-2' }}</p>
+          <p><strong>Descuentos:</strong> ${{ nomina.total_descuentos| number:'1.2-2' }}</p>
+          <p class="total"><strong>SALARIO TOTAL A PAGAR:</strong> ${{ nomina.sal_total | number:'1.2-2' }}</p>
+        </div>
+        <button class="cta-button secondary" (click)="abrirConfirmacionGuardar()">Guardar Nómina Oficial</button>
+      </div>
+
+      <!-- TABLA HISTÓRICA -->
+      <div class="tabla-nomina" *ngIf="nominasOficiales.length > 0">
+        <h3>Nóminas Guardadas</h3>
         <table>
           <thead>
             <tr>
-              <th>ID Nómina</th>
-              <th>ID Empleado</th>
-              <th>Nombre</th>
+              <th>ID</th>
+              <th>Empleado</th>
               <th>Periodo</th>
               <th>Salario Base</th>
               <th>Hrs Extras</th>
               <th>Bonos</th>
-              <th>Salario Total</th>
+              <th>Descuentos</th>
+              <th>Total</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let n of nominas">
-              <td>{{ n.id }}</td>
-              <td>{{ n.empleado_id }}</td>
-              <td>{{ n.empleado_nombre }}</td>
-              <td>{{ n.periodo_pago }}</td>
-              <td>{{ n.salario_base | currency:'USD':'symbol':'1.2-2' }}</td>
-              <td>{{ n.horas_extras }}</td>
-              <td>{{ n.bonos | currency:'USD':'symbol':'1.2-2' }}</td>
-              <td>{{ n.salario_total | currency:'USD':'symbol':'1.2-2' }}</td>
+            <tr *ngFor="let n of nominasOficiales">
+              <td>{{ n.id_nom }}</td>
+              <td>{{ n.trabajador?.nom_trb }}</td>
+              <td>{{ n.periodo_inicio }} al {{ n.periodo_fin }}</td>
+              <td>${{ n.sal_base | number:'1.2-2' }}</td>
+              <td>{{ n.total_horas_extras }}</td>
+              <td>${{ n.total_bonos | number:'1.2-2' }}</td>
+              <td>${{ n.total_descuentos | number:'1.2-2' }}</td>
+              <td><strong>${{ n.sal_total | number:'1.2-2' }}</strong></td>
             </tr>
           </tbody>
         </table>
       </div>
-
-      <p *ngIf="nominas.length === 0" class="no-data">No hay nóminas calculadas.</p>
     </div>
   </section>
-
-  <!-- Modal -->
-  <div class="modal" #successModal style="display: none;">
-    <div class="modal-content">
-      <span class="close" #closeBtn>×</span>
-      <h3>¡Nómina guardada!</h3>
-      <p>La nómina ha sido registrada correctamente.</p>
-      <button #acceptButton class="cta-button">Aceptar</button>
+  <!-- MODAL CONFIRMACIÓN -->
+<div class="success-modal-overlay" 
+     [style.display]="mostrarModalConfirm ? 'flex' : 'none'"
+     (click)="cerrarModalConfirm()">
+  <div class="success-modal" (click)="$event.stopPropagation()">
+    <div class="success-modal-icon warning">
+      <i class="fas fa-question"></i>
+    </div>
+    <h2>¿Guardar nómina oficialmente?</h2>
+    <p>Esta acción no se puede deshacer.</p>
+    <div class="modal-buttons">
+      <button class="btn-cancelar" (click)="cerrarModalConfirm()">Cancelar</button>
+      <button class="success-btn" (click)="confirmarAccion()">Sí, guardar</button>
     </div>
   </div>
+</div>
 
-  <footer>
-    <div class="container">
-      <p>© 2025/6 CarneTrack. Todos los derechos reservados.</p>
+<!-- MODAL ÉXITO -->
+<div class="success-modal-overlay" 
+     [style.display]="mostrarModalExito ? 'flex' : 'none'"
+     (click)="cerrarModalExito()">
+  <div class="success-modal" (click)="$event.stopPropagation()">
+    <div class="success-modal-icon">
+      <i class="fas fa-check"></i>
     </div>
-  </footer>
+    <h2>Nómina guardada correctamente</h2>
+    <p>La nómina quedó registrada en el sistema.</p>
+    <button class="success-btn" (click)="cerrarModalExito()">Aceptar</button>
+  </div>
+</div>
 </main>

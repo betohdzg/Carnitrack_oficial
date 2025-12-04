@@ -12,16 +12,23 @@ body {
 
 /* Botón para abrir/cerrar el menú */
 .menu-toggle {
-    position: fixed;
-    top: 20px;
-    left: 10px;
-    font-size: 24px;
-    color: #000; /* Texto negro para contrastar con fondo blanco */
-    cursor: pointer;
-    z-index: 1001;
-    padding: 10px;
-    border-radius: 5px;
+  position: fixed;
+  top: 28px;
+  left: 21px;
+  font-size: 28px;
+  color: #000;
+  width: 50px;
+  height: 50px;
+  transform: translateY(-13px); /* ← Este es el truquito: baja 1 píxel para que quede EXACTO */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1001;
+  transition: all 0.3s ease;
 }
+
+
 
 /* Menú lateral */
 .menu-lateral {
@@ -29,13 +36,12 @@ body {
     height: 100vh;
     position: fixed;
     top: 0;
-    left: -250px;
+    left: -260px;
     padding: 20px;
-    box-shadow: none; /* Línea modificada */
+    box-shadow: none;
     transition: left 0.3s ease;
     z-index: 1000;
 }
-
 .menu-lateral.active {
     left: 0;
 }
@@ -91,30 +97,22 @@ body {
 }
 
 /* Header */
-header {
-    color: #000; /* Texto negro */
-    padding: 20px 0;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+.main-header {
+position: relative;
+  height: 90px; /* Altura fija para que todo quede perfecto */
+  margin-bottom: 20px;
+  padding-left: 100px; /* Separación del menú */
+  
 }
 
-header .container {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 0 50px;
-    max-width: 1200px;
-    margin: 0 auto;
+.main-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+  transform: translateY(-7px); /* ← Este es el truquito: baja 1 píxel para que quede EXACTO */
+  letter-spacing: -1px;
 }
-
-header h1 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 600;
-    margin-left: 20px; /* Línea añadida */
-}
-
 /* Contenido principal */
 .contenido-principal {
     margin-left: 0;

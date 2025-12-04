@@ -1,0 +1,72 @@
+<!-- ESTE ES EL ÚNICO QUE FUNCIONA PERFECTO -->
+<section class="dashboard">
+  <div class="container">
+    <h1><i class="fas fa-thermometer-half"></i> Monitoreo de Temperatura</h1>
+
+    <div class="status-grid">
+      <!-- Refrigerador Principal -->
+      <div class="status-card">
+        <div class="status-header">
+          <h3><i class="fas fa-snowflake"></i> Refrigerador Principal</h3>
+          <span class="status-indicator active"></span>
+        </div>
+        <div class="temperature-display">
+          <div class="temp-value">{{ currentTemp }}°C</div>
+          <div class="temp-range">Rango ideal: 0°C - 4°C</div>
+        </div>
+        <div class="temp-gauge">
+          <div class="gauge-fill" #gaugeFill></div>
+        </div>
+        <div class="status-info">
+          <p><i class="fas fa-check-circle"></i> Estado: <span class="status-ok">Óptimo</span></p>
+          <p><i class="fas fa-clock"></i> {{ lastUpdate }}</p>
+        </div>
+      </div>
+
+      <!-- Historial de Temperatura -->
+      <div class="status-card">
+        <div class="status-header">
+          <h3><i class="fas fa-chart-line"></i> Historial de Temperatura</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="tempChart"></canvas>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">Máxima</span>
+            <span class="stat-value max">{{ maxTemp }}°C</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Mínima</span>
+            <span class="stat-value min">{{ minTemp }}°C</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Promedio</span>
+            <span class="stat-value avg">{{ avgTemp }}°C</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sistema de Alertas -->
+    <div class="alerts-section">
+      <div class="alerts-card">
+        <h3><i class="fas fa-bell"></i> Sistema de Alertas</h3>
+        <div class="alerts-list">
+          <div class="alert-item">
+            <i class="fas fa-exclamation-triangle warning"></i>
+            <span>Temperatura crítica: > 5°C por más de 5 minutos</span>
+          </div>
+          <div class="alert-item">
+            <i class="fas fa-exclamation-circle danger"></i>
+            <span>Pérdida de energía detectada</span>
+          </div>
+          <div class="alert-item">
+            <i class="fas fa-info-circle info"></i>
+            <span>Puerta abierta por más de 2 minutos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

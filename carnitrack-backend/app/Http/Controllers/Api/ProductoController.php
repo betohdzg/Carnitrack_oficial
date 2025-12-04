@@ -60,10 +60,41 @@ public function index()
 public function destroy($id)
 {
     $producto = Producto::find($id);
+    
     if (!$producto) {
         return response()->json(['error' => 'No encontrado'], 404);
     }
-    $producto->delete();
-    return response()->json(['mensaje' => 'Eliminado']);
+
+    $producto->delete(); // ← ahora es soft delete
+
+    return response()->json(['mensaje' => 'Producto eliminado correctamente']);
+}
+
+public function siguienteId(Request $request)
+{
+    $tipo = $request->query('tipo');
+
+    $prefijo = match(strtolower($tipo)) {
+        'res'     => 'CAR-RES-',
+        'pollo'   => 'CAR-POLLO-',
+        'pescado' => 'CAR-PESCADO-',
+        default   => 'CAR-DES-',
+    };
+
+    // Incluye productos eliminados (soft deletes) para no reutilizar IDs
+    $ultimo = Producto::withTrashed()
+        ->where('id', 'LIKE', $prefijo . '%')
+        ->orderBy('id', 'desc')
+        ->first();
+
+    $siguiente = 1;
+    if ($ultimo) {
+        $numero = (int) substr($ultimo->id, -3);
+        $siguiente = $numero + 1;
+    }
+
+    $nuevoId = $prefijo . str_pad($siguiente, 3, '0', STR_PAD_LEFT);
+
+    return response()->json(['id' => $nuevoId]);
 }
 }

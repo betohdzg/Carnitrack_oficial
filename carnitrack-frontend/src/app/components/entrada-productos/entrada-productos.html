@@ -26,6 +26,7 @@
       <ul class="submenu" [class.active]="nominaActive">
         <li><a href="/bono-extras-nom" onclick="setActive(this)"><i class="fas fa-gift"></i> Bonos y Extras</a></li>
         <li><a href="/calcular-nomina" onclick="setActive(this)"><i class="fas fa-calculator"></i> Cálculo Nómina</a></li>
+        <li><a routerLink="/descuentos-nom"><i class="fas fa-hand-holding-usd"></i> Descuentos</a></li>
       </ul>
     </li>
     <li><a routerLink="/cuentas-empleadoss"><i class="fas fa-users-cog"></i> Cuentas de Empleados</a></li>
@@ -44,17 +45,14 @@
         <li><a routerLink="/salida-producto"><i class="fas fa-minus"></i> Salida</a></li>
       </ul>
     </li>
-    <li><a routerLink="/mi-cuenta"><i class="fas fa-users"></i> Mi Cuenta</a></li>
     <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
   </ul>
 </aside>
 
 <!-- Contenido principal -->
 <main class="contenido-principal">
-  <header>
-    <div class="titulo">
-      <h1>CarneTrack</h1>
-    </div>
+<header class="main-header">
+    <h1>CarniTrack</h1>
   </header>
 
   <!-- Formulario de Producto -->
@@ -65,12 +63,37 @@
       <!-- FORMULARIO PRINCIPAL (solo 1) -->
       <form (submit)="guardarProducto($event)" class="formulario">
 
-        <!-- ID del Producto -->
-        <div class="form-group id_producto">
-          <label for="id_producto">ID del Producto</label>
-          <input type="text" id="id_producto" [(ngModel)]="producto.id_producto" name="id_productos" placeholder="Ej: CAR-RES-001" required>
-          <small class="form-text">El ID debe comenzar con CAR- seguido de tipo y número (ej: CAR-RES-001).</small>
-        </div>
+        <!-- Tipo de Carne -->
+<div class="form-group">
+  <label for="tipo_carne">Tipo de Carne</label>
+  <select 
+    id="tipo_carne" 
+    [(ngModel)]="producto.tipo_carne" 
+    (change)="onTipoCarneChange()" 
+    name="tipo_carne" 
+    required>
+    <option value="">Seleccione un tipo</option>
+    <option value="res">Res</option>
+    <option value="pollo">Pollo</option>
+    <option value="pescado">Pescado</option>
+  </select>
+</div>
+
+<!-- ID del Producto - AHORA ES READONLY -->
+<div class="form-group id_producto">
+  <label for="id_producto">ID del Producto</label>
+  <input 
+    type="text" 
+    id="id_producto" 
+    [(ngModel)]="producto.id_producto" 
+    name="id_productos" 
+    readonly 
+    [class.generando]="generandoId"
+    placeholder="Se generará automáticamente...">
+  <small class="form-text">
+    {{ generandoId ? 'Generando ID...' : 'ID generado automáticamente' }}
+  </small>
+</div>
 
         <!-- Nombre -->
         <div class="form-group nombre_producto">
@@ -78,16 +101,7 @@
           <input type="text" id="nombre_producto" [(ngModel)]="producto.nombre" name="nombre_producto" placeholder="Ej: Carne Molida" required>
         </div>
 
-        <!-- Tipo de Carne -->
-        <div class="form-group">
-          <label for="tipo_carne">Tipo de Carne</label>
-          <select id="tipo_carne" [(ngModel)]="producto.tipo_carne" name="tipo_carne" required>
-            <option value="">Seleccione un tipo</option>
-            <option value="res">Res</option>
-            <option value="pollo">Pollo</option>
-            <option value="pescado">Pescado</option>
-          </select>
-        </div>
+
 
         <!-- Precio y Stock -->
         <div class="form-row">
@@ -131,17 +145,21 @@
   </section>
 
   <!-- Modal de éxito -->
-  <div id="successModal" class="modal" #successModal>
-    <div class="modal-content">
-      <span class="close" #closeBtn>×</span>
-      <div class="modal-icon">
-        <i class="fas fa-check-circle"></i>
-      </div>
-      <h3>Producto registrado correctamente</h3>
-      <p>El producto ha sido registrado exitosamente en la base de datos.</p>
-      <button id="acceptButton" class="cta-button" #acceptButton>Aceptar</button>
+
+  <div class="success-modal-overlay" 
+     [style.display]="mostrarModalExito ? 'flex' : 'none'"
+     (click)="cerrarModalExito()">
+  <div class="success-modal" (click)="$event.stopPropagation()">
+    <div class="success-modal-icon">
+      <i class="fas fa-check-circle"></i>
     </div>
+     <h3>Producto registrado correctamente</h3>
+    <p>El producto ha sido registrado exitosamente en la base de datos.</p>
+    <button class="success-btn" (click)="cerrarModalExito()">Aceptar</button>
   </div>
+</div>
+
+
 
   <!-- Footer -->
   <footer>

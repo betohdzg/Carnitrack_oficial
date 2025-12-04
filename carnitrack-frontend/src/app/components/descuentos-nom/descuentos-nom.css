@@ -143,6 +143,23 @@ font-family: 'Poppins', sans-serif ;}
   box-shadow: 0 10px 20px rgba(148, 28, 47, 0.3);
 }
 
+/* Colores específicos para descuentos */
+.descuento-card .card-header { 
+  background: linear-gradient(135deg, #e74c3c, #c0392b) !important; 
+}
+
+.badge-descuento {
+  background: #e74c3c;
+  color: white;
+}
+
+.success-modal-icon {
+  background: linear-gradient(135deg, #ff9a9e, #fecfef);
+  color: #c0392b;
+}
+
+
+
 /* TABLA MODERNA */
 .history-section h3 {
   font-size: 1.8rem;

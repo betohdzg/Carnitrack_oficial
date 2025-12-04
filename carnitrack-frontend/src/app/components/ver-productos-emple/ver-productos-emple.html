@@ -34,18 +34,15 @@
                 <li><a routerLink="/salida-producto"><i class="fas fa-minus"></i> Salida</a></li>
             </ul>
         </li>
-        <li><a routerLink="/mi-cuenta"><i class="fas fa-users"></i> Mi Cuenta</a></li>
         <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
     </ul>
 </aside>
 
 <!-- Contenido principal con header -->
 <main class="contenido-principal">
-    <header>
-        <div class="titulo">
-            <h1>CarneTrack</h1>
-        </div>
-    </header>
+<header class="main-header">
+    <h1>CarniTrack</h1>
+  </header>
     <div class="container" *ngIf="filteredRows.length > 0">
         <h2>Inventario de Carnes</h2>
         <div class="search-bar">

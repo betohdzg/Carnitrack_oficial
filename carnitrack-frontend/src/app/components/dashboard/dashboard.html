@@ -24,6 +24,7 @@
                 <ul class="submenu" [class.active]="nominaActive">
             <li><a href="/bono-extras-nom" onclick="setActive(this)"><i class="fas fa-gift"></i> Bonos y Extras</a></li>
             <li><a href="/calcular-nomina" onclick="setActive(this)"><i class="fas fa-calculator"></i> Cálculo Nómina</a></li>
+            <li><a routerLink="/descuentos-nom"><i class="fas fa-hand-holding-usd"></i> Descuentos</a></li>
             </ul>       
         </li>
         
@@ -41,18 +42,15 @@
                 <li><a routerLink="/salida-producto"><i class="fas fa-minus"></i> Salida</a></li>
             </ul>
         </li>
-        <li><a routerLink="/mi-cuenta"><i class="fas fa-users"></i> Mi Cuenta</a></li>
         <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
     </ul>
 </aside>
 
 <!-- Contenido principal con header -->
 <main class="contenido-principal">
-    <header>
-        <div class="container">
-            <h1>CarneTrack</h1>
-        </div>
-    </header>
+  <header class="main-header">
+    <h1>CarniTrack</h1>
+  </header>
 
     <section class="hero">
         <div class="container">
@@ -69,19 +67,10 @@
         </div>
     </section>
 
-    <section class="productos">
-        <div class="container">
-            <h2>Productos Populares</h2>
-            <div class="lista-productos">
-                <div class="producto" *ngFor="let producto of productos">
-                    <img [src]="producto.foto_url" [alt]="producto.nombre_producto">
-                    <h3>{{ producto.nombre_producto }}</h3>
-                    <p class="precio">${{ producto.precio.toFixed(2) }}</p>
-                    <p class="stock" [ngClass]="getStockClass(producto.cantidad)">Disponibles: {{ producto.cantidad }}</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- Aquí va el monitoreo de temperatura -->
+<app-monitoreo-temperatura></app-monitoreo-temperatura>
+
+ 
 
     <footer>
         <div class="container">

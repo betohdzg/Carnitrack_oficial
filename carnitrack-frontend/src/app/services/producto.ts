@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Producto {
-  id_producto?: number;
-  nombre: string;
+id_producto?: string;   // ← CAMBIA number POR string  
+nombre: string;
   tipo_carne: 'res' | 'pollo' | 'pescado';
   precio_kg: number;
   stock_kg: number;
@@ -44,12 +44,17 @@ guardarProducto(producto: any, esEdicion: boolean = false): Observable<any> {
     return this.http.post(this.apiUrl, payload);
   }
 }
+
+getSiguienteId(tipo: string): Observable<any> {
+  return this.http.get(`${this.apiUrl}/siguiente-id?tipo=${tipo}`);
+}
+
 // AÑADE ESTE MÉTODO
 getProductoById(id: string): Observable<Producto> {
   return this.http.get<Producto>(`${this.apiUrl}/${id}`);
 }
   // Eliminar
-  eliminarProducto(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
-  }
+eliminarProducto(id: string | number): Observable<any> {
+  return this.http.delete(`${this.apiUrl}/${id}`);
+}
 }

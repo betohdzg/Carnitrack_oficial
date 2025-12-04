@@ -1,0 +1,144 @@
+<div class="menu-toggle" (click)="toggleMenu()">
+  <i class="fas fa-bars"></i>
+</div>
+
+<aside class="menu-lateral" [class.active]="menuActive">
+  <div class="menu-header"><h2>Menú</h2></div>
+  <ul class="menu-items" *ngIf="isGerente">
+    <li><a routerLink="/dashboard"><i class="fas fa-home"></i> Inicio</a></li>
+    <li><a routerLink="/ver-productos-geren"><i class="fas fa-eye"></i> Ver Productos</a></li>
+    <li>
+      <a (click)="toggleMovimientos()"><i class="fas fa-exchange-alt"></i> Movimientos</a>
+      <ul class="submenu" [class.active]="movimientosActive">
+        <li><a routerLink="/entrada-productos">Entrada</a></li>
+        <li><a routerLink="/salida-producto">Salida</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="/reporte-ventas"><i class="fas fa-chart-line"></i> Reportes de Ventas</a></li>
+    <li>
+      <a (click)="toggleNomina()"><i class="fas fa-money-check"></i> Nómina</a>
+      <ul class="submenu" [class.active]="nominaActive">
+        <li><a routerLink="/bono-extras-nom"><i class="fas fa-gift"></i> Bonos y Horas Extras</a></li>
+        <li><a routerLink="/descuentos-nom"><i class="fas fa-hand-holding-usd"></i> Descuentos</a></li>
+        <li><a routerLink="/calcular-nomina"><i class="fas fa-calculator"></i> Cálculo Nómina</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="/cuentas-empleadoss"><i class="fas fa-users-cog"></i> Cuentas Empleados</a></li>
+    <li><a (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+  </ul>
+</aside>
+
+<main class="contenido-principal">
+  <header class="main-header">
+    <h1>CarniTrack</h1>
+  </header>
+
+  <section class="bonos-extras-modern">
+    <div class="page-header">
+      <h2>Asignar Descuentos</h2>
+      <p class="subtitle">Registra préstamos, adelantos o sanciones económicas</p>
+    </div>
+
+    <div class="cards-container">
+      <div class="card descuento-card">
+        <div class="card-header">
+          <i class="fas fa-hand-holding-usd"></i>
+          <h3>Registrar Descuento</h3>
+        </div>
+        <form (ngSubmit)="asignarDescuento()" class="modern-form">
+          <div class="input-group">
+            <label>Empleado</label>
+            <select [(ngModel)]="descuento.empleado_id" name="empleado_id" required>
+              <option value="" disabled selected>Selecciona un empleado</option>
+              <option *ngFor="let e of empleados" [value]="e.id">{{ e.id }} - {{ e.nombre }}</option>
+            </select>
+          </div>
+
+          <div class="input-row">
+            <div class="input-group">
+              <label>Monto a Descontar</label>
+              <input type="number" step="0.01" [(ngModel)]="descuento.monto" name="monto" placeholder="0.00" required min="0.01">
+            </div>
+            <div class="input-group">
+              <label>Motivo</label>
+              <select [(ngModel)]="descuento.motivo" name="motivo" required>
+                <option value="" disabled selected>Selecciona motivo</option>
+                <option value="Préstamo">Préstamo</option>
+                <option value="Adelanto de Sueldo">Adelanto de Sueldo</option>
+                <option value="Daño a Equipo">Daño a Equipo</option>
+                <option value="Falta Grave">Falta Grave</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>Fecha del Descuento</label>
+            <input type="date" [(ngModel)]="descuento.fecha" name="fecha" [max]="hoy" required>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-minus-circle"></i> Registrar Descuento
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="history-section" *ngIf="registros.length > 0">
+      <h3><i class="fas fa-history"></i> Historial de Descuentos</h3>
+      <div class="table-responsive">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Empleado</th>
+              <th>Motivo</th>
+              <th>Monto</th>
+              <th>Fecha</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of registros">
+              <td>
+                <span class="badge badge-descuento">
+                  <i class="fas fa-hand-holding-usd"></i> Descuento
+                </span>
+              </td>
+              <td><strong>{{ r.empleado_id }} - {{ r.empleado_nombre }}</strong></td>
+              <td>{{ r.descripcion }}</td>
+              <td class="amount" style="color: #e74c3c;">
+                <strong>- ${{ r.monto | number:'1.2-2' }}</strong>
+              </td>
+              <td>{{ r.fecha | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <button class="btn-delete" (click)="eliminarRegistro(r.id)">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="no-data" *ngIf="registros.length === 0">
+      <i class="fas fa-inbox"></i> No hay descuentos registrados aún
+    </p>
+  </section>
+
+  <!-- MODAL DE ÉXITO -->
+  <div class="success-modal-overlay" 
+       [style.display]="mostrarModalExito ? 'flex' : 'none'"
+       (click)="cerrarModal()">
+    <div class="success-modal" (click)="$event.stopPropagation()">
+      <div class="success-modal-icon" style="background: linear-gradient(135deg, #ff9a9e, #fecfef); color: #c0392b;">
+        <i class="fas fa-check"></i>
+      </div>
+      <h2>Descuento registrado <strong>correctamente</strong></h2>
+      <p class="success-subtitle">El descuento ha sido aplicado al empleado seleccionado.</p>
+      <button class="success-btn" (click)="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+</main>

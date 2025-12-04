@@ -90,4 +90,21 @@ class TrabajadorController extends Controller
 
         return response()->json(['message' => 'Trabajador eliminado']);
     }
+
+    // NUEVO: Obtener los datos del usuario logueado
+public function miCuenta()
+{
+    // auth()->user() ahora SÍ existe gracias al middleware
+    $trabajador = auth()->user();
+
+    if (!$trabajador) {
+        return response()->json(['message' => 'No autenticado'], 401);
+    }
+
+    return response()->json([
+        'nombre' => $trabajador->nom_trb,
+        'correo' => $trabajador->user_trb,
+        'rol'    => $trabajador->rol ?? 'empleado'
+    ]);
+}
 }

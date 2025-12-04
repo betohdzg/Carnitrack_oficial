@@ -1,160 +1,189 @@
-// src/app/components/calcular-nomina/calcular-nomina.component.ts
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { AuthService } from '../../auth';
-
-interface Empleado {
-  id: number;
-  nombre: string;
-  salario: number;
-}
-
-interface Nomina {
-  id: number;
-  empleado_id: number;
-  empleado_nombre: string;
-  periodo_pago: string;
-  salario_base: number;
-  horas_extras: number;
-  bonos: number;
-  salario_total: number;
-}
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-calcular-nomina',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './calcular-nomina.html',
   styleUrls: ['./calcular-nomina.css']
 })
-export class CalcularNominaComponent implements AfterViewInit {
+export class CalcularNominaComponent implements OnInit {
+
   menuActive = false;
   movimientosActive = false;
   nominaActive = false;
-  isGerente = false;
+  isGerente = true;
 
-  empleados: Empleado[] = [
-    { id: 1, nombre: 'Juan Pérez', salario: 5000 },
-    { id: 2, nombre: 'María López', salario: 6000 }
-  ];
+  empleados: any[] = [];
+  nominasOficiales: any[] = [];
 
-  nomina: Nomina = {
-    id: 0,
+  // MODALES
+  mostrarModalExito = false;
+  mostrarModalConfirm = false;
+  accionPendiente: 'guardar' | null = null;
+
+  // Datos del formulario
+  nomina = {
     empleado_id: 0,
-    empleado_nombre: '',
-    periodo_pago: '',
-    salario_base: 0,
-    horas_extras: 0,
-    bonos: 0,
-    salario_total: 0
+    nombre: '',
+    salario: 0,
+    inicio: '',
+    fin: '',
+    calculada: false,
+    sal_base: 0,
+    total_hex: 0,
+    monto_hex: 0,
+    total_bonos: 0,
+    total_descuentos: 0,  // ← AGREGA ESTO
+    sal_total: 0
   };
 
-  nominas: Nomina[] = [
-    { id: 1, empleado_id: 1, empleado_nombre: 'Juan Pérez', periodo_pago: '2025-10-31', salario_base: 5000, horas_extras: 10, bonos: 500, salario_total: 5500 },
-    { id: 2, empleado_id: 2, empleado_nombre: 'María López', periodo_pago: '2025-10-31', salario_base: 6000, horas_extras: 5, bonos: 300, salario_total: 6300 }
-  ];
-
-  @ViewChild('successModal') successModal!: ElementRef;
-  @ViewChild('closeBtn') closeBtn!: ElementRef;
-  @ViewChild('acceptButton') acceptButton!: ElementRef;
-
   constructor(
+    private http: HttpClient,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {
     this.isGerente = this.authService.esGerente();
-    this.generarIdNomina();
   }
 
-  ngAfterViewInit() {
-    this.setupModalEvents();
+  ngOnInit(): void {
+    this.cargarEmpleados();
+    this.cargarNominasOficiales();
   }
 
-  setupModalEvents() {
-    this.closeBtn.nativeElement.addEventListener('click', () => this.cerrarModal());
-    this.acceptButton.nativeElement.addEventListener('click', () => this.cerrarModal());
+  cargarEmpleados() {
+    this.http.get<any[]>('http://127.0.0.1:8000/api/trabajadores').subscribe({
+      next: (data) => {
+        this.empleados = data.map(t => ({
+          id: t.id_trb,
+          nombre: t.nom_trb,
+          salario: t.sal_base
+        }));
+        this.cdr.detectChanges(); // ← Crucial para que el <select> se llene al instante
+      },
+      error: () => alert('Error cargando empleados')
+    });
   }
 
-  toggleMenu() {
-    this.menuActive = !this.menuActive;
-  }
-
-  toggleMovimientos() {
-    this.movimientosActive = !this.movimientosActive;
-    this.nominaActive = false;
-  }
-
-  toggleNomina() {
-    this.nominaActive = !this.nominaActive;
-    this.movimientosActive = false;
-  }
-
-  logout() {
-    this.authService.logout();
-    alert('Cerrando sesión...');
-    this.router.navigate(['/login']);
-  }
-
-  generarIdNomina() {
-    this.nomina.id = this.nominas.length > 0 ? Math.max(...this.nominas.map(n => n.id)) + 1 : 1;
-  }
-
-  cargarEmpleado() {
+  cargarSalarioBase() {
     const emp = this.empleados.find(e => e.id === this.nomina.empleado_id);
     if (emp) {
-      this.nomina.empleado_nombre = emp.nombre;
-      this.nomina.salario_base = emp.salario;
-      this.calcularTotal();
+      this.nomina.nombre = emp.nombre;
     }
   }
 
-  calcularTotal() {
-    const pagoHorasExtras = this.nomina.horas_extras * (this.nomina.salario_base / 160); // 160 horas/mes
-    this.nomina.salario_total = this.nomina.salario_base + pagoHorasExtras + this.nomina.bonos;
-  }
-
-  calcularNomina() {
-    if (!this.nomina.empleado_id || !this.nomina.periodo_pago) {
-      alert('Seleccione empleado y fecha');
-      return;
-    }
-    this.calcularTotal();
-    alert('Nómina calculada: $' + this.nomina.salario_total.toFixed(2));
-  }
-
-  guardarNomina() {
-    if (!this.nomina.empleado_id || !this.nomina.periodo_pago || this.nomina.salario_total === 0) {
-      alert('Complete todos los campos y calcule la nómina');
-      return;
+  calcularNominaAutomatica() {
+    if (!this.nomina.empleado_id || !this.nomina.inicio || !this.nomina.fin) {
+      return alert('Selecciona empleado y periodo completo');
     }
 
-    const nuevaNomina: Nomina = { ...this.nomina };
-    this.nominas.push(nuevaNomina);
-    this.mostrarModal();
-    this.limpiarFormulario();
-    this.generarIdNomina();
+    this.http.post('http://127.0.0.1:8000/api/calcular-nomina', {
+      id_trb: this.nomina.empleado_id,
+      periodo_inicio: this.nomina.inicio,
+      periodo_fin: this.nomina.fin
+    }).subscribe({
+      next: (res: any) => {
+        this.nomina.calculada = true;
+        this.nomina.sal_base = res.sal_base;
+        this.nomina.total_hex = res.total_horas_extras;
+        this.nomina.monto_hex = res.monto_horas_extras;
+        this.nomina.total_bonos = res.total_bonos;
+        this.nomina.total_descuentos = Number(res.total_descuentos || 0); // ← SEGURO
+        this.nomina.sal_total = res.sal_total;
+        this.cdr.detectChanges(); // ← Aparece el resultado al instante
+      },
+      error: () => alert('Error al calcular nómina')
+    });
   }
 
-  mostrarModal() {
-    this.successModal.nativeElement.style.display = 'flex';
+  // MODALES
+  abrirConfirmacionGuardar() {
+    this.mostrarModalConfirm = true;
+    this.accionPendiente = 'guardar';
   }
 
-  cerrarModal() {
-    this.successModal.nativeElement.style.display = 'none';
+  confirmarAccion() {
+    if (this.accionPendiente === 'guardar') {
+      this.guardarNominaOficialReal();
+    }
   }
 
-  limpiarFormulario() {
+  guardarNominaOficialReal() {
+    this.http.post('http://127.0.0.1:8000/api/nominas-oficiales', {
+      id_trb: this.nomina.empleado_id,
+      periodo_ini: this.nomina.inicio,
+      periodo_fin: this.nomina.fin,
+      sal_base: this.nomina.sal_base,
+      total_horas_extras: this.nomina.total_hex,
+      total_bonos: this.nomina.total_bonos,
+      total_descuentos: this.nomina.total_descuentos || 0,  // ← ENVÍA EL DESCUENTO
+      sal_total: this.nomina.sal_total
+    }).subscribe({
+      next: () => {
+        this.cerrarModalConfirm();     // ← Cierra confirmación
+        this.mostrarModalExito = true;
+        this.cdr.detectChanges(); // ← Modal de éxito aparece INMEDIATAMENTE
+        this.cargarNominasOficiales();
+        this.resetForm();
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Error al guardar nómina oficial');
+      }
+    });
+  }
+
+  cargarNominasOficiales() {
+    this.http.get<any[]>('http://127.0.0.1:8000/api/nominas-oficiales').subscribe(data => {
+      this.nominasOficiales = data.map(n => {
+        const format = (d: string) => d ? d.split('T')[0].split('-').reverse().join('/') : '';
+        return {
+          ...n,
+          periodo_inicio: n.periodo_ini ? format(n.periodo_ini) : '',
+          periodo_fin: n.periodo_fin ? format(n.periodo_fin) : ''
+        };
+      });
+      this.cdr.detectChanges();
+    });
+  }
+
+  cerrarModalConfirm() {
+    this.mostrarModalConfirm = false;
+    this.accionPendiente = null;
+  }
+
+  cerrarModalExito() {
+    this.mostrarModalExito = false;
+    this.router.navigate(['/dashboard']); // ← Aquí sí te lleva al inicio
+  }
+
+  resetForm() {
     this.nomina = {
-      id: this.nomina.id + 1,
       empleado_id: 0,
-      empleado_nombre: '',
-      periodo_pago: '',
-      salario_base: 0,
-      horas_extras: 0,
-      bonos: 0,
-      salario_total: 0
+      nombre: '',
+      salario: 0,
+      inicio: '',
+      fin: '',
+      calculada: false,
+      sal_base: 0,
+      total_hex: 0,
+      monto_hex: 0,
+      total_bonos: 0,
+      total_descuentos: 0,     // ← RESETEADO
+      sal_total: 0
     };
   }
+
+  // Menú
+  toggleMenu() { this.menuActive = !this.menuActive; }
+  toggleMovimientos() { this.movimientosActive = !this.movimientosActive; this.nominaActive = false; }
+  toggleNomina() { this.nominaActive = !this.nominaActive; this.movimientosActive = false; }
+  logout() { this.authService.logout(); this.router.navigate(['/login']); }
 }

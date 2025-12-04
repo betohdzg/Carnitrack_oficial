@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes; // ← AÑADE ESTO
 
 class Producto extends Model
 {
+    use SoftDeletes; // ← Y ESTO
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';

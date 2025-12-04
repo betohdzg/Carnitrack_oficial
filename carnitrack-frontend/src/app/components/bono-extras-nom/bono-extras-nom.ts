@@ -1,149 +1,150 @@
-// src/app/components/bonos-extra/bonos-extra.component.ts
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { AuthService } from '../../auth';
-
-interface Empleado {
-  id: number;
-  nombre: string;
-}
-
-interface Bono {
-  id?: number;
-  empleado_id: number;
-  empleado_nombre: string;
-  monto: number;
-  motivo: string;
-  horas_extras: number;
-  fecha_pago: string;
-}
+import { forkJoin } from 'rxjs';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
-  selector: 'app-bonos-extra',
+  selector: 'app-bonos-extras-nom',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './bono-extras-nom.html',
   styleUrls: ['./bono-extras-nom.css']
 })
-export class BonosExtrasNomComponent implements AfterViewInit {
-  menuActive = false;
-  movimientosActive = false;  // ← NUEVO
-  nominaActive = false;  isGerente = false;
-
-  empleados: Empleado[] = [
-    { id: 1, nombre: 'Juan Pérez' },
-    { id: 2, nombre: 'María López' },
-    { id: 3, nombre: 'Pedro Gómez' }
-  ];
-
-  bono = {
-    empleado_id: 0,
-    monto: 0,
-    motivo: '',
-    horas_extras: 0,
-    fecha_pago: ''
-  };
-
-  bonos: Bono[] = [
-    { empleado_id: 1, empleado_nombre: 'Juan Pérez', monto: 500, motivo: 'Productividad', horas_extras: 2, fecha_pago: '2025-10-31' },
-    { empleado_id: 2, empleado_nombre: 'María López', monto: 300, motivo: 'Puntualidad', horas_extras: 1, fecha_pago: '2025-10-31' }
-  ];
-
+export class BonosExtrasNomComponent implements OnInit {
+  hoy = new Date().toISOString().split('T')[0];
+  menuActive = false; movimientosActive = false; nominaActive = false;
+  isGerente = true;
+  empleados: any[] = [];
+  registros: any[] = [];
+  mostrarModalExito = false;
+  ultimaAccion: 'bono' | 'hex' | null = null;
+  bono = { empleado_id: 0, monto: 0, motivo: '', fecha: this.hoy };
+  hex = { empleado_id: 0, horas: 1, fecha: this.hoy };
   @ViewChild('successModal') successModal!: ElementRef;
-  @ViewChild('closeBtn') closeBtn!: ElementRef;
-  @ViewChild('acceptButton') acceptButton!: ElementRef;
 
   constructor(
+    private http: HttpClient,
     private router: Router,
-    private authService: AuthService
+    private auth: AuthService,
+    private cdr: ChangeDetectorRef 
   ) {
-    this.isGerente = this.authService.esGerente();
+    this.isGerente = this.auth.esGerente();
   }
 
-  ngAfterViewInit() {
-    this.setupModalEvents();
+  ngOnInit() {
+    this.cargarEmpleados();
   }
 
-  setupModalEvents() {
-    this.closeBtn.nativeElement.addEventListener('click', () => this.cerrarModal());
-    this.acceptButton.nativeElement.addEventListener('click', () => this.cerrarModal());
+  cargarEmpleados() {
+    this.http.get<any[]>('http://127.0.0.1:8000/api/trabajadores').subscribe(d => {
+      this.empleados = d.map(t => ({ id: t.id_trb, nombre: t.nom_trb }));
+      this.cdr.detectChanges();
+      this.cargarRegistros(); // Mueve aquí para asegurar que empleados estén cargados antes de registros
+    });
   }
 
-  toggleMenu() {
-    this.menuActive = !this.menuActive;
+  cargarRegistros() {
+    forkJoin({
+      bonos: this.http.get<any[]>('http://127.0.0.1:8000/api/bonos'),
+      extras: this.http.get<any[]>('http://127.0.0.1:8000/api/horas-extras')
+    }).subscribe({
+      next: ({ bonos, extras }) => {
+        const b = bonos.map(x => ({
+          id: x.id_bono, tipo: 'Bono', empleado_id: x.id_trb,
+          empleado_nombre: this.getNombre(x.id_trb), descripcion: x.motivo,
+          monto: x.monto, fecha: x.fecha_registro
+        }));
+        const e = extras.map(x => ({
+          id: x.id_hex, tipo: 'Horas Extras', empleado_id: x.id_trb,
+          empleado_nombre: this.getNombre(x.id_trb), descripcion: 'Horas extras trabajadas',
+          horas: x.horas, fecha: x.fecha
+        }));
+        this.registros = [...b, ...e].sort((a,b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+        this.cdr.detectChanges(); // Asegura actualización después de cargar registros
+      },
+      error: () => {
+        this.registros = [];
+      }
+    });
   }
 
-// Submenús independientes
-  toggleMovimientos() {
-    this.movimientosActive = !this.movimientosActive;
-    // Opcional: cerrar el otro
-    this.nominaActive = false;
+  getNombre(id: number) {
+    return this.empleados.find(e => e.id === id)?.nombre || 'Desconocido';
   }
 
-  toggleNomina() {
-    this.nominaActive = !this.nominaActive;
-    // Opcional: cerrar el otro
-    this.movimientosActive = false;
-  }
-
-  logout() {
-    this.authService.logout();
-    alert('Cerrando sesión...');
-    this.router.navigate(['/login']);
-  }
-
-  asignarBono(event: Event) {
-    event.preventDefault();
-
-    if (!this.bono.empleado_id || this.bono.monto <= 0 || !this.bono.fecha_pago) {
-      alert('Completa los campos obligatorios');
+  asignarBono() {
+    if (!this.bono.empleado_id || this.bono.monto <= 0 || !this.bono.motivo || this.bono.motivo.trim() === '') {
+      alert('Completa todos los campos, incluyendo un motivo válido');
       return;
     }
-
-    const empleado = this.empleados.find(e => e.id === this.bono.empleado_id);
-    if (!empleado) return;
-
-    const nuevoBono: Bono = {
-      empleado_id: this.bono.empleado_id,
-      empleado_nombre: empleado.nombre,
+    this.http.post('http://127.0.0.1:8000/api/bonos', {
+      id_trb: this.bono.empleado_id,
       monto: this.bono.monto,
-      motivo: this.bono.motivo,
-      horas_extras: this.bono.horas_extras,
-      fecha_pago: this.bono.fecha_pago
-    };
-
-    this.bonos.push(nuevoBono);
-    this.mostrarModal();
-    this.limpiarFormulario();
+      motivo: this.bono.motivo.trim(), // ← Asegura que no esté vacío
+      fecha_registro: this.bono.fecha
+    }).subscribe({
+      next: () => {
+        this.ultimaAccion = 'bono';
+        this.mostrarModalExito = true;
+        this.cdr.detectChanges(); // Fuerza detección de cambios para mostrar el modal inmediatamente
+        this.resetBono();
+        this.cargarRegistros();
+      },
+      error: (err) => {
+        console.error('Error completo:', err);
+        alert('Error al guardar bono. Revisa la consola.');
+      }
+    });
   }
 
-  eliminarBono(index: number) {
-    if (confirm('¿Eliminar este bono?')) {
-      this.bonos.splice(index, 1);
-    }
+  registrarHorasExtras() {
+    if (!this.hex.empleado_id || this.hex.horas < 1) return alert('Completa los campos');
+    this.http.post('http://127.0.0.1:8000/api/horas-extras', {
+      id_trb: this.hex.empleado_id,
+      horas: this.hex.horas,
+      fecha: this.hex.fecha
+    }).subscribe({
+      next: () => {
+        this.ultimaAccion = 'hex';
+        this.mostrarModalExito = true;
+        this.cdr.detectChanges(); // Fuerza detección de cambios para mostrar el modal inmediatamente
+        this.resetHex();
+        this.cargarRegistros();
+      },
+      error: (err) => {
+        console.error('Error completo:', err);
+        alert('Error al guardar horas extras. Revisa la consola.');
+      }
+    });
   }
 
-  generarReporte() {
-    alert('Reporte generado (próximo paso)');
-  }
-
-  mostrarModal() {
-    this.successModal.nativeElement.style.display = 'flex';
+  eliminarRegistro(id: number, tipo: string) {
+    if (!confirm('¿Eliminar?')) return;
+    const url = tipo === 'Bono' ? `bonos/${id}` : `horas-extras/${id}`;
+    this.http.delete(`http://127.0.0.1:8000/api/${url}`).subscribe(() => this.cargarRegistros());
   }
 
   cerrarModal() {
-    this.successModal.nativeElement.style.display = 'none';
+    this.mostrarModalExito = false;
+    this.ultimaAccion = null;
+    this.router.navigate(['/dashboard']); 
   }
 
-  limpiarFormulario() {
-    this.bono = {
-      empleado_id: 0,
-      monto: 0,
-      motivo: '',
-      horas_extras: 0,
-      fecha_pago: ''
-    };
+  resetBono() {
+    this.bono = { empleado_id: 0, monto: 0, motivo: '', fecha: this.hoy };
   }
+
+  resetHex() {
+    this.hex = { empleado_id: 0, horas: 1, fecha: this.hoy };
+  }
+
+  toggleMenu() { this.menuActive = !this.menuActive; }
+  toggleMovimientos() { this.movimientosActive = !this.movimientosActive; this.nominaActive = false; }
+  toggleNomina() { this.nominaActive = !this.nominaActive; this.movimientosActive = false; }
+  logout() { this.auth.logout(); this.router.navigate(['/login']); }
 }

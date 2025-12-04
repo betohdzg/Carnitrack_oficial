@@ -1,13 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../../auth';
-import { ProductoService, Producto } from '../../services/producto';
-import { ChangeDetectorRef } from '@angular/core';
+import { ProductoService } from '../../services/producto';
 
 interface ProductoTabla {
-  id: number;
+  id: string;  // ← CAMBIADO A STRING (tu ID es CAR-RES-001)
   tipo: string;
   nombre: string;
   precio: string;
@@ -30,6 +29,10 @@ export class VerProductosGerenComponent implements OnInit {
   nominaActive = false;
   isGerente = false;
 
+  // MODAL DE CONFIRMACIÓN
+  mostrarModalConfirmarEliminar = false;
+  productoAEliminar: string | null = null;
+
   rows: ProductoTabla[] = [];
   filteredRows: ProductoTabla[] = [];
   searchQuery = '';
@@ -38,26 +41,20 @@ export class VerProductosGerenComponent implements OnInit {
     private router: Router,
     private authService: AuthService,
     private productoService: ProductoService,
-    private cdr: ChangeDetectorRef // ← INYECTAR
-  ) {
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit() {
+    this.isGerente = this.authService.esGerente();
+    this.cargarProductos();
   }
 
-ngOnInit() {
-  this.isGerente = this.authService.esGerente(); // ← MOVER AQUÍ
-  this.cargarProductos();
-}
+  cargarProductos() {
+    this.productoService.getProductos().subscribe({
+      next: (response: any) => {
+        const data = Array.isArray(response) ? response : [];
 
-cargarProductos() {
-  this.productoService.getProductos().subscribe({
-    next: (response: any) => {
-      console.log('Respuesta completa:', response);
-
-      const data = Array.isArray(response) ? response : [];
-
-      this.rows = data.map((p: any) => {
-        console.log('Producto recibido:', p);
-
-        return {
+        this.rows = data.map((p: any) => ({
           id: p.id,
           tipo: this.capitalize(p.tipo_carne || 'Sin tipo'),
           nombre: p.nombre || 'Sin nombre',
@@ -66,18 +63,50 @@ cargarProductos() {
           estado: p.fecha_caducidad ? this.getEstado(p.fecha_caducidad) : 'Sin fecha',
           entrada: p.fecha_entrada ? this.formatDate(p.fecha_entrada) : 'Sin fecha',
           caducidad: p.fecha_caducidad ? this.formatDate(p.fecha_caducidad) : 'Sin fecha'
-        };
-      });
+        }));
 
-      this.filteredRows = [...this.rows];
-      this.cdr.detectChanges();
-    },
-    error: (err) => {
-      console.error('Error:', err);
-      alert('Error al cargar productos');
-    }
-  });
-}
+        this.filteredRows = [...this.rows];
+        this.cdr.detectChanges();
+      },
+      error: () => alert('Error al cargar productos')
+    });
+  }
+
+  // === MODAL DE ELIMINAR ===
+  borrarProducto(id: string) {
+    this.productoAEliminar = id;
+    this.mostrarModalConfirmarEliminar = true;
+    this.cdr.detectChanges();
+  }
+
+  cancelarEliminar() {
+    this.mostrarModalConfirmarEliminar = false;
+    this.productoAEliminar = null;
+  }
+
+  confirmarEliminar() {
+    if (!this.productoAEliminar) return;
+
+    this.productoService.eliminarProducto(this.productoAEliminar).subscribe({
+      next: () => {
+        this.mostrarModalConfirmarEliminar = false;
+        this.productoAEliminar = null;
+        this.cargarProductos(); // Recarga la lista (los eliminados desaparecen por soft delete)
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error:', err);
+        alert('Error al eliminar el producto');
+        this.cancelarEliminar();
+      }
+    });
+  }
+
+  editarProducto(id: string) {
+    this.router.navigate(['/entrada-productos'], { queryParams: { edit: id } });
+  }
+
+  // === FILTROS Y FORMATO ===
   filterTable() {
     const filter = this.searchQuery.toLowerCase();
     this.filteredRows = this.rows.filter(row =>
@@ -97,7 +126,6 @@ cargarProductos() {
     const hoy = new Date();
     const caducidad = new Date(fechaCaducidad);
     const diffDays = Math.ceil((caducidad.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-
     if (diffDays < 0) return 'Caducado';
     if (diffDays <= 3) return 'Próximo a caducar';
     return 'Disponible';
@@ -107,30 +135,9 @@ cargarProductos() {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  editarProducto(id: number) {
-    this.router.navigate(['/entrada-productos'], { queryParams: { edit: id } });
-  }
-
-  borrarProducto(id: number) {
-    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-      this.productoService.eliminarProducto(id).subscribe({
-        next: () => {
-          this.rows = this.rows.filter(p => p.id !== id);
-          this.filteredRows = this.filteredRows.filter(p => p.id !== id);
-          alert('Producto eliminado correctamente');
-        },
-        error: (err) => {
-          console.error('Error al eliminar:', err);
-          alert('Error al eliminar el producto');
-        }
-      });
-    }
-  }
-
-   // Menú
+  // === MENÚ ===
   toggleMenu() { this.menuActive = !this.menuActive; }
   toggleMovimientos() { this.movimientosActive = !this.movimientosActive; this.nominaActive = false; }
   toggleNomina() { this.nominaActive = !this.nominaActive; this.movimientosActive = false; }
   logout() { this.authService.logout(); this.router.navigate(['/login']); }
-
 }
